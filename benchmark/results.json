@@ -1,0 +1,466 @@
+{
+  "mode": "deterministic_fixture",
+  "token_measurement": "Estimated from UTF-8 JSON size divided by four. Cache reuse is the common prefix with the previous accepted request in the fixture's serialization.",
+  "model": "deterministic-inventory-fixture",
+  "task": "inventory_migration",
+  "batches": 32,
+  "max_output_tokens": 640,
+  "cases": {
+    "baseline": {
+      "status": "context_limit",
+      "metrics": {
+        "requests": 10,
+        "responses": 9,
+        "retries": 0,
+        "context_rejections": 1,
+        "estimated_prompt_tokens": 14954,
+        "estimated_completion_tokens": 582,
+        "peak_estimated_prompt_tokens": 2975,
+        "prompt_tokens": 14954,
+        "completion_tokens": 582,
+        "cached_prompt_tokens": 11930,
+        "usage_responses": 9,
+        "prompt_usage_responses": 9,
+        "completion_usage_responses": 9,
+        "cache_usage_responses": 9,
+        "tool_calls": 9,
+        "tool_errors": 0,
+        "compactions": 0
+      },
+      "compactions": [],
+      "context_window": 4096,
+      "successful": false,
+      "acceptance": {
+        "passed": false,
+        "correct_batches": 3,
+        "expected_batches": 32,
+        "audit_default": false,
+        "audit_alternate": false,
+        "audit_missing_batch": false,
+        "raw_unchanged": true,
+        "failures": [
+          "missing normalized/03.json",
+          "missing normalized/04.json",
+          "missing normalized/05.json",
+          "missing normalized/06.json",
+          "missing normalized/07.json",
+          "missing normalized/08.json",
+          "missing normalized/09.json",
+          "missing normalized/10.json",
+          "missing normalized/11.json",
+          "missing normalized/12.json",
+          "missing normalized/13.json",
+          "missing normalized/14.json",
+          "missing normalized/15.json",
+          "missing normalized/16.json",
+          "missing normalized/17.json",
+          "missing normalized/18.json",
+          "missing normalized/19.json",
+          "missing normalized/20.json",
+          "missing normalized/21.json",
+          "missing normalized/22.json",
+          "missing normalized/23.json",
+          "missing normalized/24.json",
+          "missing normalized/25.json",
+          "missing normalized/26.json",
+          "missing normalized/27.json",
+          "missing normalized/28.json",
+          "missing normalized/29.json",
+          "missing normalized/30.json",
+          "missing normalized/31.json",
+          "audit default input failed",
+          "audit alternate input failed",
+          "audit did not reject a missing batch"
+        ]
+      },
+      "total_tokens": 15536,
+      "uncached_prompt_tokens": 3024,
+      "fixture": {
+        "accepted_requests": 9,
+        "rejected_requests": 1,
+        "peak_accepted_prompt_tokens": 2975,
+        "first_rejected_prompt_tokens": 3595,
+        "fixed_head_variants": 1,
+        "tool_schema_variants": 1,
+        "estimated_prefix_tokens_at_history_rewrites": [],
+        "checkpoint_source_at_completion": null
+      }
+    },
+    "enhanced": {
+      "status": "completed",
+      "metrics": {
+        "requests": 70,
+        "responses": 70,
+        "retries": 0,
+        "context_rejections": 0,
+        "estimated_prompt_tokens": 194737,
+        "estimated_completion_tokens": 6088,
+        "peak_estimated_prompt_tokens": 3456,
+        "prompt_tokens": 194737,
+        "completion_tokens": 6088,
+        "cached_prompt_tokens": 121525,
+        "usage_responses": 70,
+        "prompt_usage_responses": 70,
+        "completion_usage_responses": 70,
+        "cache_usage_responses": 70,
+        "tool_calls": 69,
+        "tool_errors": 0,
+        "compactions": 31
+      },
+      "compactions": [
+        {
+          "reason": "budget",
+          "before_tokens": 3503,
+          "after_tokens": 2690,
+          "removed_turns": 3,
+          "archived_turns": 3,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3537,
+          "after_tokens": 2755,
+          "removed_turns": 2,
+          "archived_turns": 5,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3597,
+          "after_tokens": 2748,
+          "removed_turns": 2,
+          "archived_turns": 7,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3589,
+          "after_tokens": 2742,
+          "removed_turns": 2,
+          "archived_turns": 9,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3604,
+          "after_tokens": 2763,
+          "removed_turns": 2,
+          "archived_turns": 11,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3608,
+          "after_tokens": 2714,
+          "removed_turns": 3,
+          "archived_turns": 14,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3564,
+          "after_tokens": 2754,
+          "removed_turns": 1,
+          "archived_turns": 15,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3461,
+          "after_tokens": 2616,
+          "removed_turns": 2,
+          "archived_turns": 17,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3464,
+          "after_tokens": 2615,
+          "removed_turns": 2,
+          "archived_turns": 19,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3463,
+          "after_tokens": 2604,
+          "removed_turns": 2,
+          "archived_turns": 21,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3602,
+          "after_tokens": 2754,
+          "removed_turns": 2,
+          "archived_turns": 23,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3600,
+          "after_tokens": 2752,
+          "removed_turns": 2,
+          "archived_turns": 25,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3604,
+          "after_tokens": 2757,
+          "removed_turns": 2,
+          "archived_turns": 27,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3462,
+          "after_tokens": 2616,
+          "removed_turns": 2,
+          "archived_turns": 29,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3460,
+          "after_tokens": 2608,
+          "removed_turns": 2,
+          "archived_turns": 31,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3470,
+          "after_tokens": 2613,
+          "removed_turns": 2,
+          "archived_turns": 33,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3461,
+          "after_tokens": 2617,
+          "removed_turns": 2,
+          "archived_turns": 35,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3471,
+          "after_tokens": 2609,
+          "removed_turns": 2,
+          "archived_turns": 37,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3461,
+          "after_tokens": 2613,
+          "removed_turns": 2,
+          "archived_turns": 39,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3462,
+          "after_tokens": 2609,
+          "removed_turns": 2,
+          "archived_turns": 41,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3469,
+          "after_tokens": 2617,
+          "removed_turns": 2,
+          "archived_turns": 43,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3470,
+          "after_tokens": 2621,
+          "removed_turns": 2,
+          "archived_turns": 45,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3471,
+          "after_tokens": 2611,
+          "removed_turns": 2,
+          "archived_turns": 47,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3466,
+          "after_tokens": 2613,
+          "removed_turns": 2,
+          "archived_turns": 49,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3458,
+          "after_tokens": 2608,
+          "removed_turns": 2,
+          "archived_turns": 51,
+          "retained_turns": 4
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3599,
+          "after_tokens": 2744,
+          "removed_turns": 2,
+          "archived_turns": 53,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3596,
+          "after_tokens": 2751,
+          "removed_turns": 2,
+          "archived_turns": 55,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3596,
+          "after_tokens": 2756,
+          "removed_turns": 2,
+          "archived_turns": 57,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3598,
+          "after_tokens": 2746,
+          "removed_turns": 2,
+          "archived_turns": 59,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3598,
+          "after_tokens": 2753,
+          "removed_turns": 2,
+          "archived_turns": 61,
+          "retained_turns": 5
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3599,
+          "after_tokens": 2758,
+          "removed_turns": 2,
+          "archived_turns": 63,
+          "retained_turns": 5
+        }
+      ],
+      "context_window": 4096,
+      "successful": true,
+      "acceptance": {
+        "passed": true,
+        "correct_batches": 32,
+        "expected_batches": 32,
+        "audit_default": true,
+        "audit_alternate": true,
+        "audit_missing_batch": true,
+        "raw_unchanged": true,
+        "failures": []
+      },
+      "total_tokens": 200825,
+      "uncached_prompt_tokens": 73212,
+      "fixture": {
+        "accepted_requests": 70,
+        "rejected_requests": 0,
+        "peak_accepted_prompt_tokens": 3456,
+        "first_rejected_prompt_tokens": null,
+        "fixed_head_variants": 1,
+        "tool_schema_variants": 1,
+        "estimated_prefix_tokens_at_history_rewrites": [
+          840,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860,
+          860
+        ],
+        "checkpoint_source_at_completion": "compacted_history"
+      }
+    },
+    "baseline_wide": {
+      "status": "completed",
+      "metrics": {
+        "requests": 69,
+        "responses": 69,
+        "retries": 0,
+        "context_rejections": 0,
+        "estimated_prompt_tokens": 886959,
+        "estimated_completion_tokens": 5192,
+        "peak_estimated_prompt_tokens": 25210,
+        "prompt_tokens": 886959,
+        "completion_tokens": 5192,
+        "cached_prompt_tokens": 861324,
+        "usage_responses": 69,
+        "prompt_usage_responses": 69,
+        "completion_usage_responses": 69,
+        "cache_usage_responses": 69,
+        "tool_calls": 68,
+        "tool_errors": 0,
+        "compactions": 0
+      },
+      "compactions": [],
+      "context_window": 65536,
+      "successful": true,
+      "acceptance": {
+        "passed": true,
+        "correct_batches": 32,
+        "expected_batches": 32,
+        "audit_default": true,
+        "audit_alternate": true,
+        "audit_missing_batch": true,
+        "raw_unchanged": true,
+        "failures": []
+      },
+      "total_tokens": 892151,
+      "uncached_prompt_tokens": 25635,
+      "fixture": {
+        "accepted_requests": 69,
+        "rejected_requests": 0,
+        "peak_accepted_prompt_tokens": 25210,
+        "first_rejected_prompt_tokens": null,
+        "fixed_head_variants": 1,
+        "tool_schema_variants": 1,
+        "estimated_prefix_tokens_at_history_rewrites": [],
+        "checkpoint_source_at_completion": "workspace_file"
+      }
+    }
+  },
+  "equal_work_prompt_reduction_pct": 78.04
+}
