@@ -102,4 +102,4 @@ python3 -m benchmark.live_probe --base-url http://127.0.0.1:18433/v1 \
   --trace /tmp/loola-live-trace.jsonl --output /tmp/loola-live-results.json
 ```
 
-[Журнал работы с агентом](AGENT_SESSION.md).
+[Журнал работы с агентом](AGENT_SESSION.md) · [Выгрузка исходного чата Codex](<Выгрузка исходного чата Codex.txt>).
