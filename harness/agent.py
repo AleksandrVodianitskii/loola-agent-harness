@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
+from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -190,10 +191,12 @@ class Agent:
     def __init__(
         self, config: AgentConfig, *, workspace: Path, client: ChatClient | None = None,
         skills: Iterable[SkillSpec] = (),
+        on_event: Callable[[str, dict], None] | None = None,
     ):
         self.config = config
         self.workspace = Path(workspace)
         self.skills = tuple(skills)
+        self.on_event = on_event
         self.client = client if client is not None else ChatClient(
             config.base_url, config.model, config.api_key, max_output_tokens=config.max_output_tokens,
             timeout=config.timeout, max_retries=config.max_retries, cache_key=config.cache_key,
@@ -218,26 +221,50 @@ class Agent:
         status = "max_turns"
         error = None
 
+        def prepare_context(*, recover: bool = False) -> list[dict]:
+            previous = len(context.events)
+            messages = context.prepare(recover=recover, overhead=overhead)
+            if self.on_event is not None:
+                for event in context.events[previous:]:
+                    self.on_event("compaction", asdict(event))
+            return messages
+
         try:
             for _ in range(config.max_turns):
-                messages = context.prepare(overhead=overhead)
+                messages = prepare_context()
                 for recovery in range(config.max_context_recoveries + 1):
                     try:
                         response = self.client.complete(
                             messages, GATEWAY_TOOLS, on_attempt=metrics.record_attempt,
                         )
                         break
-                    except ContextRejected:
+                    except ContextRejected as exc:
                         metrics.context_rejections += 1
+                        if self.on_event is not None:
+                            self.on_event("context_rejection", {
+                                "http_status": exc.http_status, "request": metrics.requests,
+                            })
                         if recovery == config.max_context_recoveries:
                             raise
-                        messages = context.prepare(recover=True, overhead=overhead)
+                        messages = prepare_context(recover=True)
 
                 prompt_estimate = estimate_tokens(messages, GATEWAY_TOOLS)
                 metrics.record_completion(response, prompt_estimate)
+                if self.on_event is not None:
+                    self.on_event("usage", {
+                        "estimated_prompt_tokens": prompt_estimate,
+                        "estimated_completion_tokens": estimate_tokens([response.message]) - estimate_tokens([]),
+                        "prompt_tokens": response.prompt_tokens,
+                        "completion_tokens": response.completion_tokens,
+                        "cached_prompt_tokens": response.cached_prompt_tokens,
+                        "finish_reason": response.finish_reason,
+                    })
                 if response.prompt_tokens is not None:
                     overhead = max(overhead, response.prompt_tokens - prompt_estimate)
                 assistant = _assistant_turn(response.message)
+                if self.on_event is not None:
+                    observed = {key: value for key, value in assistant.items() if key != "reasoning_content"}
+                    self.on_event("assistant", deepcopy(observed))
                 content = (assistant["content"] or "").strip()
                 if response.finish_reason in ("length", "content_filter"):
                     status = "output_limit" if response.finish_reason == "length" else "content_filtered"
@@ -259,7 +286,10 @@ class Agent:
                         metrics.tool_errors += 1
                         raise ToolInfrastructureError("tool_infrastructure_failure") from None
                     metrics.tool_errors += int(result["ok"] is False)
-                    turn.append({"role": "tool", "tool_call_id": call["id"], "content": serialized})
+                    tool_message = {"role": "tool", "tool_call_id": call["id"], "content": serialized}
+                    turn.append(tool_message)
+                    if self.on_event is not None:
+                        self.on_event("tool", tool_message.copy())
                 context.append_turn(turn)
         except (ContextRejected, ContextBudgetError) as exc:
             status, error = "context_limit", str(exc)

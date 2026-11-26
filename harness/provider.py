@@ -59,6 +59,22 @@ def _retry_after(header: str | None) -> float:
             return 0
 
 
+def is_context_overflow(status: int, detail: object) -> bool:
+    if status not in (400, 413, 422) or not isinstance(detail, dict):
+        return False
+    context_codes = (
+        "context_length_exceeded", "context_window_exceeded", "input_too_long",
+        "exceed_context_size", "exceed_context_size_error",
+    )
+    message = detail.get("message", "")
+    message = message.lower() if isinstance(message, str) else ""
+    return (
+        detail.get("code") in context_codes or detail.get("type") in context_codes
+        or "maximum context length" in message or "context window is exceeded" in message
+        or "exceeds the available context size" in message
+    )
+
+
 def _provider_error(error: HTTPError) -> tuple[ProviderError, bool, float]:
     status = error.code
     try:
@@ -69,13 +85,7 @@ def _provider_error(error: HTTPError) -> tuple[ProviderError, bool, float]:
     finally:
         error.close()
     code = detail.get("code") if isinstance(detail, dict) else None
-    message = detail.get("message", "") if isinstance(detail, dict) else ""
-    message = message.lower() if isinstance(message, str) else ""
-    context_codes = ("context_length_exceeded", "context_window_exceeded", "input_too_long")
-    if status in (400, 413, 422) and (
-        code in context_codes or "maximum context length" in message
-        or "context window is exceeded" in message
-    ):
+    if is_context_overflow(status, detail):
         return ContextRejected("context_length_exceeded", http_status=status), False, 0
     if status in (401, 403):
         return ProviderError("provider_access_denied", http_status=status), False, 0

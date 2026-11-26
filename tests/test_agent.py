@@ -52,12 +52,14 @@ class AgentTest(unittest.TestCase):
         )
         self.delays = []
 
-    def run_agent(self, endpoint):
+    def run_agent(self, endpoint, on_event=None):
         client = ChatClient(
             self.config.base_url, self.config.model, max_output_tokens=self.config.max_output_tokens,
             cache_key=self.config.cache_key, opener=endpoint, sleep=self.delays.append,
         )
-        return Agent(self.config, workspace=self.workspace, client=client).run("Create a report.")
+        return Agent(
+            self.config, workspace=self.workspace, client=client, on_event=on_event,
+        ).run("Create a report.")
 
     def test_atomic_turn_and_model_correctable_json(self):
         invalid = call("2", "tool_run", None)
@@ -101,6 +103,22 @@ class AgentTest(unittest.TestCase):
         self.assertEqual(endpoint.requests[1]["messages"][:2], endpoint.requests[2]["messages"][:2])
         self.assertLess(result.compactions[0]["after_tokens"], result.compactions[0]["before_tokens"])
         self.assertEqual(self.delays, [])
+
+    def test_llama_overflow_trace_records_recovery_before_next_response(self):
+        first = completion("I will use the workspace. " * 100, [call("1", "skill_list", {})])
+        first["choices"][0]["message"]["reasoning_content"] = "private metadata"
+        endpoint = ScriptedEndpoint(
+            first, (400, {"type": "exceed_context_size"}), completion("Done."),
+        )
+        observed = []
+        result = self.run_agent(endpoint, lambda kind, payload: observed.append((kind, payload)))
+        self.assertEqual(result.status, "completed")
+        self.assertEqual([kind for kind, _ in observed], [
+            "usage", "assistant", "tool", "context_rejection", "compaction", "usage", "assistant",
+        ])
+        self.assertNotIn("reasoning_content", observed[1][1])
+        self.assertEqual(observed[3][1], {"http_status": 400, "request": 2})
+        self.assertEqual(observed[4][1], result.compactions[0])
 
     def test_bad_batch_is_rejected_before_dispatch(self):
         endpoint = ScriptedEndpoint(completion(calls=[

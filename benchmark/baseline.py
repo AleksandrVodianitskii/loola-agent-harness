@@ -12,7 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, build_opener
 
 from harness.context import estimate_tokens
-from harness.provider import NoRedirects
+from harness.provider import NoRedirects, is_context_overflow
 
 
 SYSTEM_PROMPT = """\
@@ -61,6 +61,7 @@ def run_baseline(
     prompt: str, workspace: Path, *,
     base_url: str, model: str, api_key: str, max_output_tokens: int, max_turns: int,
     output_token_field: str, opener: Callable | None = None,
+    on_event: Callable[[str, dict], None] | None = None,
 ) -> dict:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}]
     metrics = {
@@ -90,41 +91,48 @@ def run_baseline(
         try:
             with open_request(request, timeout=60) as response:
                 body = json.loads(response.read())
-            message = body["choices"][0]["message"]
+            choice = body["choices"][0]
+            message = choice["message"]
         except HTTPError as exc:
             try:
-                detail = json.loads(exc.read(64 * 1024)).get("error") or {}
-                error_code = detail.get("code")
-                error_message = str(detail.get("message", "")).lower()
+                body = json.loads(exc.read(64 * 1024))
+                detail = body.get("error") if isinstance(body, dict) else None
             except (ValueError, OSError, AttributeError):
-                error_code, error_message = None, ""
+                detail = None
             finally:
                 exc.close()
-            if (
-                error_code in ("context_length_exceeded", "context_window_exceeded", "input_too_long")
-                or "maximum context length" in error_message
-                or "context window is exceeded" in error_message
-            ):
+            if is_context_overflow(exc.code, detail if isinstance(detail, dict) else {}):
                 status = "context_limit"
                 metrics["context_rejections"] += 1
             else:
                 status = "provider_error"
+            if on_event:
+                on_event("provider_error", {"status": status, "http_status": exc.code})
             break
         except (URLError, OSError, ValueError, KeyError, IndexError, TypeError):
             status = "provider_error"
+            if on_event:
+                on_event("provider_error", {"status": status})
             break
         metrics["responses"] += 1
         metrics["estimated_prompt_tokens"] += estimate
         metrics["peak_estimated_prompt_tokens"] = max(metrics["peak_estimated_prompt_tokens"], estimate)
-        metrics["estimated_completion_tokens"] += estimate_tokens([message]) - estimate_tokens([])
+        estimated_output = estimate_tokens([message]) - estimate_tokens([])
+        metrics["estimated_completion_tokens"] += estimated_output
         usage = body.get("usage")
         usage = usage if isinstance(usage, dict) else {}
         details = usage.get("prompt_tokens_details")
         cached = details.get("cached_tokens") if isinstance(details, dict) else None
         prompt_count = usage.get("prompt_tokens")
+        turn_usage = {
+            "estimated_prompt_tokens": estimate, "estimated_completion_tokens": estimated_output,
+            "prompt_tokens": None, "completion_tokens": None, "cached_prompt_tokens": None,
+            "finish_reason": choice.get("finish_reason"),
+        }
         if type(cached) is int and cached >= 0 and (type(prompt_count) is not int or cached <= prompt_count):
             metrics["cached_prompt_tokens"] = (metrics["cached_prompt_tokens"] or 0) + cached
             metrics["cache_usage_responses"] += 1
+            turn_usage["cached_prompt_tokens"] = cached
         recorded = 0
         for kind in ("prompt", "completion"):
             key = f"{kind}_tokens"
@@ -132,11 +140,16 @@ def run_baseline(
             if type(count) is int and count >= 0:
                 metrics[key] = (metrics[key] or 0) + count
                 metrics[f"{kind}_usage_responses"] += 1
+                turn_usage[key] = count
                 recorded += 1
         if recorded == 2:
             metrics["usage_responses"] += 1
         content = (message.get("content") or "").strip()
         calls = message.get("tool_calls") or []
+        if on_event:
+            on_event("usage", turn_usage)
+            on_event("assistant", {"role": "assistant", "content": message.get("content"),
+                                   "tool_calls": calls})
         if not calls:
             status = "completed"
             break
@@ -154,5 +167,8 @@ def run_baseline(
             metrics["tool_calls"] += 1
             metrics["tool_errors"] += not result.startswith("Exit code: 0\n")
             messages.append({"role": "assistant", "content": content or None, "tool_calls": [call]})
-            messages.append({"role": "tool", "tool_call_id": call["id"], "content": result})
+            tool_message = {"role": "tool", "tool_call_id": call["id"], "content": result}
+            messages.append(tool_message)
+            if on_event:
+                on_event("tool", tool_message)
     return {"status": status, "metrics": metrics, "compactions": []}

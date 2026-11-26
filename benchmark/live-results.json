@@ -1,0 +1,138 @@
+{
+  "mode": "live_checkpoint_probe",
+  "model": "qwen3-8b-q4-k-m",
+  "provider_context_window": 4096,
+  "max_output_tokens": 384,
+  "pressure_files": 11,
+  "pressure_bytes_per_file": 1700,
+  "baseline": "Same gateway/prompt with a wider local budget and no context-overflow recovery.",
+  "cases": {
+    "before": {
+      "harness_context_window": 65536,
+      "status": "context_limit",
+      "error": "context_length_exceeded (HTTP 400)",
+      "metrics": {
+        "requests": 12,
+        "responses": 11,
+        "retries": 0,
+        "context_rejections": 1,
+        "estimated_prompt_tokens": 31700,
+        "estimated_completion_tokens": 627,
+        "peak_estimated_prompt_tokens": 5388,
+        "prompt_tokens": 25432,
+        "completion_tokens": 385,
+        "cached_prompt_tokens": 21385,
+        "usage_responses": 11,
+        "prompt_usage_responses": 11,
+        "completion_usage_responses": 11,
+        "cache_usage_responses": 11,
+        "tool_calls": 11,
+        "tool_errors": 0,
+        "compactions": 0
+      },
+      "compactions": [],
+      "acceptance": {
+        "passed": false,
+        "profile_read_attempts": 1,
+        "verified_reads": [
+          "profile.txt",
+          "logs/01.txt",
+          "logs/02.txt",
+          "logs/03.txt",
+          "logs/04.txt",
+          "logs/05.txt",
+          "logs/06.txt",
+          "logs/07.txt",
+          "logs/08.txt"
+        ],
+        "ordered_reads": false,
+        "checkpoint_before_pressure": true,
+        "checkpoint_received_after_compaction": false,
+        "report_correct": false,
+        "inputs_unchanged": true
+      }
+    },
+    "after": {
+      "harness_context_window": 4096,
+      "status": "completed",
+      "error": null,
+      "metrics": {
+        "requests": 16,
+        "responses": 16,
+        "retries": 0,
+        "context_rejections": 0,
+        "estimated_prompt_tokens": 41816,
+        "estimated_completion_tokens": 994,
+        "peak_estimated_prompt_tokens": 3557,
+        "prompt_tokens": 33958,
+        "completion_tokens": 670,
+        "cached_prompt_tokens": 24592,
+        "usage_responses": 16,
+        "prompt_usage_responses": 16,
+        "completion_usage_responses": 16,
+        "cache_usage_responses": 16,
+        "tool_calls": 15,
+        "tool_errors": 0,
+        "compactions": 4
+      },
+      "compactions": [
+        {
+          "reason": "budget",
+          "before_tokens": 3802,
+          "after_tokens": 2811,
+          "removed_turns": 4,
+          "archived_turns": 4,
+          "retained_turns": 3
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3888,
+          "after_tokens": 2922,
+          "removed_turns": 2,
+          "archived_turns": 6,
+          "retained_turns": 3
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3999,
+          "after_tokens": 2873,
+          "removed_turns": 2,
+          "archived_turns": 8,
+          "retained_turns": 3
+        },
+        {
+          "reason": "budget",
+          "before_tokens": 3950,
+          "after_tokens": 2873,
+          "removed_turns": 2,
+          "archived_turns": 10,
+          "retained_turns": 3
+        }
+      ],
+      "acceptance": {
+        "passed": true,
+        "profile_read_attempts": 1,
+        "verified_reads": [
+          "profile.txt",
+          "logs/01.txt",
+          "logs/02.txt",
+          "logs/03.txt",
+          "logs/04.txt",
+          "logs/05.txt",
+          "logs/06.txt",
+          "logs/07.txt",
+          "logs/08.txt",
+          "logs/09.txt",
+          "logs/10.txt",
+          "logs/11.txt"
+        ],
+        "ordered_reads": true,
+        "checkpoint_before_pressure": true,
+        "checkpoint_received_after_compaction": true,
+        "report_correct": true,
+        "inputs_unchanged": true
+      }
+    }
+  },
+  "demonstrated": true
+}
